@@ -1,0 +1,94 @@
+{
+    "pipeline": {
+        "name": "martin-pipeline",
+        "roleArn": "arn:aws:iam::183494329089:role/CodePipelineServiceRole",
+        "artifactStore": {
+            "type": "S3",
+            "location": "codepipeline-us-east-1-183494329089"
+        },
+        "stages": [
+            {
+                "name": "Source",
+                "actions": [
+                    {
+                        "name": "Source",
+                        "actionTypeId": {
+                            "category": "Source",
+                            "owner": "AWS",
+                            "provider": "CodeStarSourceConnection",
+                            "version": "1"
+                        },
+                        "configuration": {
+                            "ConnectionArn": "arn:aws:codestar-connections:us-east-1:183494329089:connection/d3a5e227-b38e-40a9-951d-2e7c78682353",
+                            "FullRepositoryId": "martinjohny167/cicd_assignment",
+                            "BranchName": "main",
+                            "OutputArtifactFormat": "CODE_ZIP"
+                        },
+                        "outputArtifacts": [
+                            {
+                                "name": "SourceOutput"
+                            }
+                        ],
+                        "runOrder": 1
+                    }
+                ]
+            },
+            {
+                "name": "Build",
+                "actions": [
+                    {
+                        "name": "Build",
+                        "actionTypeId": {
+                            "category": "Build",
+                            "owner": "AWS",
+                            "provider": "CodeBuild",
+                            "version": "1"
+                        },
+                        "configuration": {
+                            "ProjectName": "martin-build"
+                        },
+                        "inputArtifacts": [
+                            {
+                                "name": "SourceOutput"
+                            }
+                        ],
+                        "outputArtifacts": [
+                            {
+                                "name": "BuildOutput"
+                            }
+                        ],
+                        "runOrder": 1
+                    }
+                ]
+            },
+            {
+                "name": "Deploy",
+                "actions": [
+                    {
+                        "name": "Deploy",
+                        "actionTypeId": {
+                            "category": "Deploy",
+                            "owner": "AWS",
+                            "provider": "CloudFormation",
+                            "version": "1"
+                        },
+                        "configuration": {
+                            "ActionMode": "CREATE_UPDATE",
+                            "RoleArn": "arn:aws:iam::183494329089:role/CodeBuildServiceRole",
+                            "StackName": "martin-stack",
+                            "TemplatePath": "BuildOutput::template.json",
+                            "TemplateConfiguration": "BuildOutput::template-config.json",
+                            "Capabilities": "CAPABILITY_IAM,CAPABILITY_NAMED_IAM"
+                        },
+                        "inputArtifacts": [
+                            {
+                                "name": "BuildOutput"
+                            }
+                        ],
+                        "runOrder": 1
+                    }
+                ]
+            }
+        ]
+    }
+} 

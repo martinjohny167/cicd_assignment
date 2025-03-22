@@ -1,0 +1,25 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - npm install -g aws-cdk
+      - npm install
+  build:
+    commands:
+      - cdk synth
+      - cdk deploy --require-approval never
+  post_build:
+    commands:
+      - echo "Build completed successfully"
+
+artifacts:
+  files:
+    - '**/*'
+  base-directory: '.'
+
+cache:
+  paths:
+    - 'node_modules/**/*' 
